@@ -1,23 +1,79 @@
-from datetime import datetime
+from pathlib import Path
 
-def days_diff(date_str):
-    try:
-        requested_day = datetime.strptime(date_str, '%Y-%m-%d').date()
-        today_date = datetime.today().date()
-        diff_day = today_date - requested_day
-        return  diff_day.days
-    except ValueError:
-        return"Помилка"
+def total_salary(path):
+    file_path = Path(path)
 
-
-import random
-
-def get_numbers_ticket(min, max, quantity):
-    if min < 1 or max > 1000 or quantity < 1 or quantity > (max - min + 1):
-        return []
-    numbers = random.sample(range(min, max + 1),quantity)
-
-    numbers.sort()
+    if not file_path.exists():
+       print(f'File by path  "{path}" not found.')
+       return 0, 0
     
-    return numbers
-print(get_numbers_ticket(4, 30, 3 ))
+    total = 0
+    count = 0
+
+    try:
+        with file_path.open("r", encoding= "utf-8") as file:
+            for line in file:
+                line = line.strip()
+                if not line:
+                    continue
+                try: 
+                    name, salary = line.split(",")
+                    salary = float(salary)
+                    total += salary
+                    count += 1
+                except ValueError:
+                    print(f"String processing error: {line}")
+
+        if count ==0:
+            return 0, 0
+
+        average = total / count
+        return total, average
+
+    except Exception as e:           
+        print(f"An error occurred: {e}")
+        return 0, 0
+    
+total, average = total_salary("salary_file.py")
+print(f"Total salary: {total}, average salary: {average}")
+
+
+
+from pathlib import Path
+
+def get_cats_info(path):
+    file_path = Path(path)
+
+
+    if not file_path.exists():
+        print(f"file '{path}' not found.")
+        return[]
+    
+    cats = []
+
+    try:
+        with file_path.open("r", encoding= "utf-8") as file:
+            for line in file:
+                line = line.strip
+                if not line:
+                    continue
+                try:
+                    cat_id, name, age = line.split(",")
+                    cat_dict = {
+                        "id": cat_id,
+                        "name": name,
+                        "age": age
+                }
+                    cats.append(cat_dict)
+                except ValueError:
+                    print(f"Error processing line: {line}")
+                    continue
+        return  cats
+
+    except Exception as e:
+        print(f"An error occured while reading the file:{e}")
+        return[]
+    
+
+cats_info = get_cats_info("kiot.py")
+print(cats_info)
