@@ -41,6 +41,7 @@ print(f"Total salary: {total}, average salary: {average}")
 
 from pathlib import Path
 
+
 def get_cats_info(path):
     file_path = Path(path)
 
@@ -54,7 +55,7 @@ def get_cats_info(path):
     try:
         with file_path.open("r", encoding= "utf-8") as file:
             for line in file:
-                line = line.strip
+                line = line.strip()
                 if not line:
                     continue
                 try:
@@ -75,5 +76,69 @@ def get_cats_info(path):
         return[]
     
 
-cats_info = get_cats_info("kiot.py")
+cats_info = get_cats_info("cats_file.txt")
 print(cats_info)
+
+
+def parse_input(user_input):
+    command, *args = user_input.split()
+    command = command.strip().lower()
+    return command, args
+
+def add_contact(args,contacts):
+    name, phone = args
+    contacts[name] = phone
+    return "Contact added."
+
+def change_contact(args, contacts):
+    name, phone = args
+    if name in contacts:
+       contacts[name] = phone
+       return "Contact update"
+    else:
+       return "Error: contact not found."
+    
+def show_phone(args, contacts):
+    name = args[0]
+    if name in contacts:
+       return contacts [name]
+    else:
+        return "Error: contact not found."
+    
+    
+def show_all (contacts):
+    result = ""
+    for name, phone in contacts.items():
+        result += f"{name}: {phone}\n"
+    return result.strip()
+
+def main():
+    contacts = {}
+    print("Welcome to the assistant bot!")
+
+
+    while True:
+        user_input = input("Enter a comand: ").strip()
+        if not user_input:
+            continue
+        command, args = parse_input(user_input)
+        if command in ["close","exit"]:
+            print("Good bye!")
+            break
+        elif command == "hello":
+            print("How can i help you?")
+        elif command =="add":
+            print(add_contact(args, contacts))
+        elif command == "change":
+            print(change_contact(args, contacts))
+        elif command == "phone":
+            print(show_phone(args,contacts))
+        elif command == "all":
+            print(show_all(contacts))
+        else:
+            print("Invalid command.")
+        
+
+if __name__ == "__main__":
+   main()
+
