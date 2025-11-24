@@ -1,144 +1,108 @@
-from pathlib import Path
-
-def total_salary(path):
-    file_path = Path(path)
-
-    if not file_path.exists():
-       print(f'File by path  "{path}" not found.')
-       return 0, 0
+# 1
+def caching_fibonacci():
     
-    total = 0
-    count = 0
+    cache = {}
 
-    try:
-        with file_path.open("r", encoding= "utf-8") as file:
-            for line in file:
-                line = line.strip()
-                if not line:
-                    continue
-                try: 
-                    name, salary = line.split(",")
-                    salary = float(salary)
-                    total += salary
-                    count += 1
-                except ValueError:
-                    print(f"String processing error: {line}")
+    def fibonacci(n):
+        if n <= 0:
+            return 0
+        if n == 1:
+            return 1
+        if n in cache:
+            return cache[n]
+        cache[n] = fibonacci(n-1) + fibonacci(n-2)
+        return cache[n]
+        
+    return fibonacci
+numbers = caching_fibonacci()
+print(numbers(10))
 
-        if count ==0:
-            return 0, 0
 
-        average = total / count
-        return total, average
+# 2
+import re 
 
-    except Exception as e:           
-        print(f"An error occurred: {e}")
-        return 0, 0
+def generator_numbers (text):
+
+    numbers = re.findall(r"\d+\.\d+", text)
+    for num in numbers:
+        yield float(num)
+def sum_profit(text: str, func):
+    return sum(func(text))
+        
+text = "Загальний дохід працівника складається з декількох частин: 1000.01 як основний дохід, доповнений додатковими надходженнями" \
+" 27.45 і 324.00 доларів."
+
+total_income = sum_profit(text, generator_numbers)
+print(f"Загальний дохід: {total_income}")
+
+
+# 4
+
+def input_error(func):
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ValueError:
+            return "Give me name and phone please"
+        except KeyError:
+            return "Contact not found"
+        except IndexError:
+            return "Not enough arguments"
+    return inner
+
+contacts = {}
     
-total, average = total_salary("salary_file.py")
-print(f"Total salary: {total}, average salary: {average}")
-
-
-
-from pathlib import Path
-
-
-def get_cats_info(path):
-    file_path = Path(path)
-
-
-    if not file_path.exists():
-        print(f"file '{path}' not found.")
-        return[]
-    
-    cats = []
-
-    try:
-        with file_path.open("r", encoding= "utf-8") as file:
-            for line in file:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    cat_id, name, age = line.split(",")
-                    cat_dict = {
-                        "id": cat_id,
-                        "name": name,
-                        "age": age
-                }
-                    cats.append(cat_dict)
-                except ValueError:
-                    print(f"Error processing line: {line}")
-                    continue
-        return  cats
-
-    except Exception as e:
-        print(f"An error occured while reading the file:{e}")
-        return[]
-    
-
-cats_info = get_cats_info("cats_file.txt")
-print(cats_info)
-
-
-def parse_input(user_input):
-    command, *args = user_input.split()
-    command = command.strip().lower()
-    return command, args
-
+@input_error
 def add_contact(args,contacts):
     name, phone = args
     contacts[name] = phone
-    return "Contact added."
-
+    return "Contact added"
+    
+@input_error
 def change_contact(args, contacts):
     name, phone = args
-    if name in contacts:
-       contacts[name] = phone
-       return "Contact update"
-    else:
-       return "Error: contact not found."
-    
-def show_phone(args, contacts):
+    contacts[name] = phone
+    return f"Contact {name} changed."
+
+@input_error
+def get_phone(args,contacts):
     name = args[0]
-    if name in contacts:
-       return contacts [name]
-    else:
-        return "Error: contact not found."
+    return contacts[name]
     
-    
+@input_error
 def show_all (contacts):
     result = ""
     for name, phone in contacts.items():
         result += f"{name}: {phone}\n"
     return result.strip()
+    
+commands = {
+    "add": add_contact,
+    "change": change_contact,
+    "phone": get_phone,
+    "all": show_all
+    }
 
-def main():
-    contacts = {}
-    print("Welcome to the assistant bot!")
 
+while True:
+    command_input = input("Enter a comand:").split()
+    if not command_input:
+        continue
 
-    while True:
-        user_input = input("Enter a comand: ").strip()
-        if not user_input:
-            continue
-        command, args = parse_input(user_input)
-        if command in ["close","exit"]:
-            print("Good bye!")
-            break
-        elif command == "hello":
-            print("How can i help you?")
-        elif command =="add":
-            print(add_contact(args, contacts))
-        elif command == "change":
-            print(change_contact(args, contacts))
-        elif command == "phone":
-            print(show_phone(args,contacts))
-        elif command == "all":
-            print(show_all(contacts))
+    command = command_input[0]
+    args = command_input[1:]
+
+    if command in ["exit", "close", "goodbye"]:
+        print("Goodbye!")
+        break
+
+    if command in commands:
+        func = commands[command]
+            
+        if command == "all":
+            print(func(contacts))
         else:
-            print("Invalid command.")
-        
+            print(func(args, contacts))
 
-if __name__ == "__main__":
-   main()
-
+    else:
+        print("Unknown command")
